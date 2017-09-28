@@ -2,3 +2,5 @@
 *.iml
 gwt-unitCache/
 **/classes/
+war/stockwatcher/
+war/WEB-INF/deploy/
