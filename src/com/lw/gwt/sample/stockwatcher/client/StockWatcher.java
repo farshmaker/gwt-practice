@@ -1,6 +1,7 @@
 package com.lw.gwt.sample.stockwatcher.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.HRElement;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -31,8 +32,18 @@ public class StockWatcher implements EntryPoint {
         stocksFlexTable.setText(0, 2, "Change");
         stocksFlexTable.setText(0, 3, "Remove");
 
+        stocksFlexTable.setCellPadding(6);
+
+        stocksFlexTable.getRowFormatter().addStyleName(0, "watchListHeader");
+        stocksFlexTable.addStyleName("watchList");
+
+        stocksFlexTable.getCellFormatter().addStyleName(0, 1, "watchListNumericColumn");
+        stocksFlexTable.getCellFormatter().addStyleName(0, 2, "watchListNumericColumn");
+        stocksFlexTable.getCellFormatter().addStyleName(0, 3, "watchListRemoveColumn");
+
         addPanel.add(newSymbolTextBox);
         addPanel.add(addStockButton);
+        addPanel.addStyleName("addPanel");
 
         mainPanel.add(stocksFlexTable);
         mainPanel.add(addPanel);
@@ -63,7 +74,6 @@ public class StockWatcher implements EntryPoint {
         final String symbol = newSymbolTextBox.getText().toUpperCase().trim();
         newSymbolTextBox.setFocus(true);
 
-        // Stock code must be between 1 and 10 chars that are numbers, letters, or dots.
         if (!symbol.matches("^[0-9A-Z\\.]{1,10}$")) {
             Window.alert("'" + symbol + "' is not a valid symbol.");
             newSymbolTextBox.selectAll();
@@ -76,8 +86,13 @@ public class StockWatcher implements EntryPoint {
         int row = stocksFlexTable.getRowCount();
         stocks.add(symbol);
         stocksFlexTable.setText(row, 0, symbol);
+        stocksFlexTable.setWidget(row, 2, new Label());
+        stocksFlexTable.getCellFormatter().addStyleName(row, 1, "watchListNumericColumn");
+        stocksFlexTable.getCellFormatter().addStyleName(row, 2, "watchListNumericColumn");
+        stocksFlexTable.getCellFormatter().addStyleName(row, 3, "watchListRemoveColumn");
 
         Button removeStockButton = new Button("x");
+        removeStockButton.addStyleDependentName("remove");
         removeStockButton.addClickHandler(e -> {
             int removedIndex = stocks.indexOf(symbol);
             stocks.remove(removedIndex);
@@ -129,6 +144,16 @@ public class StockWatcher implements EntryPoint {
         String changePercentText = changeFormat.format(price.getChangePercent());
 
         stocksFlexTable.setText(row, 1, priceText);
-        stocksFlexTable.setText(row, 2, changeText + " (" + changePercentText + "%)");
+        Label changeLabel = (Label) stocksFlexTable.getWidget(row, 2);
+        changeLabel.setText(changeText + " (" + changePercentText + "%)");
+
+        String changeStyleName = "noChange";
+        if(price.getChangePercent() < -0.1f) {
+            changeStyleName = "negativeChange";
+        } else if (price.getChangePercent() > 0.1f) {
+            changeStyleName = "positiveChange";
+        }
+
+        changeLabel.setStyleName(changeStyleName);
     }
 }
